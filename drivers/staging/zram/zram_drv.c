@@ -29,11 +29,55 @@
 #include <linux/genhd.h>
 #include <linux/highmem.h>
 #include <linux/slab.h>
-#include <linux/lzo.h>
 #include <linux/string.h>
 #include <linux/vmalloc.h>
 
 #include "zram_drv.h"
+
+#if defined(CONFIG_ZRAM_LZO)
+#include <linux/lzo.h>
+#define WMSIZE		LZO1X_MEM_COMPRESS
+#define COMPRESS(s, sl, d, dl, wm)	\
+	lzo1x_1_compress(s, sl, d, dl, wm)
+#define DECOMPRESS(s, sl, d, dl)	\
+	lzo1x_decompress_safe(s, sl, d, dl)
+#elif defined(CONFIG_ZRAM_SNAPPY)
+#include "../snappy/csnappy.h" /* if built in drivers/staging */
+#define WMSIZE_ORDER	((PAGE_SHIFT > 14) ? (15) : (PAGE_SHIFT+1))
+#define WMSIZE		(1 << WMSIZE_ORDER)
+static int
+snappy_compress_(
+	const unsigned char *src,
+	size_t src_len,
+	unsigned char *dst,
+	size_t *dst_len,
+	void *workmem)
+{
+	const unsigned char *end = csnappy_compress_fragment(
+		src, (uint32_t)src_len, dst, workmem, WMSIZE_ORDER);
+	*dst_len = end - dst;
+	return 0;
+}
+static int
+snappy_decompress_(
+	const unsigned char *src,
+	size_t src_len,
+	unsigned char *dst,
+	size_t *dst_len)
+{
+	uint32_t dst_len_ = (uint32_t)*dst_len;
+	int ret = csnappy_decompress_noheader(src, src_len, dst, &dst_len_);
+	*dst_len = (size_t)dst_len_;
+	return ret;
+}
+#define COMPRESS(s, sl, d, dl, wm)	\
+	snappy_compress_(s, sl, d, dl, wm)
+#define DECOMPRESS(s, sl, d, dl)	\
+	snappy_decompress_(s, sl, d, dl)
+#else
+#error either CONFIG_ZRAM_LZO or CONFIG_ZRAM_SNAPPY must be defined
+#endif
+
 
 /* Globals */
 static int zram_major;
@@ -249,7 +293,7 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 
 	cmem = zs_map_object(zram->mem_pool, zram->table[index].handle);
 
-	ret = lzo1x_decompress_safe(cmem + sizeof(*zheader),
+	ret = DECOMPRESS(cmem + sizeof(*zheader),
 				    zram->table[index].size,
 				    uncmem, &clen);
 
@@ -263,7 +307,7 @@ static int zram_bvec_read(struct zram *zram, struct bio_vec *bvec,
 	kunmap_atomic(user_mem);
 
 	/* Should NEVER happen. Return bio error if it does. */
-	if (unlikely(ret != LZO_E_OK)) {
+	if (unlikely(ret)) {
 		pr_err("Decompression failed! err=%d, page=%u\n", ret, index);
 		zram_stat64_inc(zram, &zram->stats.failed_reads);
 		return ret;
@@ -296,13 +340,14 @@ static int zram_read_before_write(struct zram *zram, char *mem, u32 index)
 		return 0;
 	}
 
-	ret = lzo1x_decompress_safe(cmem + sizeof(*zheader),
+	ret = DECOMPRESS(cmem + sizeof(*zheader),
 				    zram->table[index].size,
 				    mem, &clen);
+
 	zs_unmap_object(zram->mem_pool, zram->table[index].handle);
 
 	/* Should NEVER happen. Return bio error if it does. */
-	if (unlikely(ret != LZO_E_OK)) {
+	if (unlikely(ret)) {
 		pr_err("Decompression failed! err=%d, page=%u\n", ret, index);
 		zram_stat64_inc(zram, &zram->stats.failed_reads);
 		return ret;
@@ -369,14 +414,15 @@ static int zram_bvec_write(struct zram *zram, struct bio_vec *bvec, u32 index,
 		goto out;
 	}
 
-	ret = lzo1x_1_compress(uncmem, PAGE_SIZE, src, &clen,
+	COMPRESS(uncmem, PAGE_SIZE, src, &clen,
 			       zram->compress_workmem);
+	ret = 0;
 
 	kunmap_atomic(user_mem);
 	if (is_partial_io(bvec))
 			kfree(uncmem);
 
-	if (unlikely(ret != LZO_E_OK)) {
+	if (unlikely(ret != 0)) {
 		pr_err("Compression failed! err=%d\n", ret);
 		goto out;
 	}
@@ -635,7 +681,7 @@ int zram_init_device(struct zram *zram)
 
 	zram_set_disksize(zram, totalram_pages << PAGE_SHIFT);
 
-	zram->compress_workmem = kzalloc(LZO1X_MEM_COMPRESS, GFP_KERNEL);
+	zram->compress_workmem = kzalloc(WMSIZE, GFP_KERNEL);
 	if (!zram->compress_workmem) {
 		pr_err("Error allocating compressor working memory!\n");
 		ret = -ENOMEM;
@@ -788,6 +834,10 @@ static int __init zram_init(void)
 {
 	int ret, dev_id;
 
+	if (num_devices == 0) {
+		num_devices = CONFIG_ZRAM_NUM_DEVICES;
+	}
+
 	if (num_devices > max_num_devices) {
 		pr_warning("Invalid value for num_devices: %u\n",
 				num_devices);
@@ -800,11 +850,6 @@ static int __init zram_init(void)
 		pr_warning("Unable to get major number\n");
 		ret = -EBUSY;
 		goto out;
-	}
-
-	if (!num_devices) {
-		pr_info("num_devices not specified. Using default: 1\n");
-		num_devices = 1;
 	}
 
 	/* Allocate the device array and initialize each one */
