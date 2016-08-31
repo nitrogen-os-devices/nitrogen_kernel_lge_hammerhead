@@ -461,3 +461,11 @@ config SND_SOC_MSM_HDMI_CODEC_RX
 	help
 	HDMI audio drivers should be built only if the platform
         supports hdmi panel.
+
+config SOUND_CONTROL
+	tristate "Generic WCD9320 Sound Engine"
+	depends on SND_SOC_WCD9320
+	default y
+	help
+	  This is a sound engine with sysfs controls for WCD9320
+	  chipsets.
