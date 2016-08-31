@@ -184,26 +184,7 @@ static int mdss_edp_pwm_config(struct mdss_edp_drv_pdata *edp_drv)
 		return -EIO;
 	}
 
-	edp_drv->gpio_panel_pwm = of_get_named_gpio(edp_drv->pdev->dev.of_node,
-			"gpio-panel-pwm", 0);
-	if (!gpio_is_valid(edp_drv->gpio_panel_pwm)) {
-		pr_err("%s: gpio_panel_pwm=%d not specified\n", __func__,
-				edp_drv->gpio_panel_pwm);
-		goto edp_free_pwm;
-	}
-
-	ret = gpio_request(edp_drv->gpio_panel_pwm, "disp_pwm");
-	if (ret) {
-		pr_err("%s: Request reset gpio_panel_pwm failed, ret=%d\n",
-				__func__, ret);
-		goto edp_free_pwm;
-	}
-
 	return 0;
-
-edp_free_pwm:
-	pwm_free(edp_drv->bl_pwm);
-	return -ENODEV;
 }
 
 void mdss_edp_set_backlight(struct mdss_panel_data *pdata, u32 bl_level)
@@ -563,11 +544,20 @@ static int edp_event_thread(void *data)
 	struct mdss_edp_drv_pdata *ep;
 	unsigned long flag;
 	u32 todo = 0;
+	int ret;
 
 	ep = (struct mdss_edp_drv_pdata *)data;
 
 	while (1) {
-		wait_event(ep->event_q, (ep->event_pndx != ep->event_gndx));
+		ret = wait_event_interruptible(ep->event_q,
+			(ep->event_pndx != ep->event_gndx) ||
+			kthread_should_stop());
+
+		if (ret) {
+			pr_debug("%s: interrupted", __func__);
+                        continue;
+		}
+
 		spin_lock_irqsave(&ep->event_lock, flag);
 		if (ep->event_pndx == ep->event_gndx) {
 			spin_unlock_irqrestore(&ep->event_lock, flag);
