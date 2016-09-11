@@ -1924,6 +1924,18 @@ config CPU_VOLTAGE_TABLE
 	help
 	  Krait User Votlage Control
 
+config CPU_UNDERCLOCK
+	bool "Enable CPU Underclocking option"
+	default n
+	help
+	  Krait underclocking up to 223 MHz
+
+config CPU_OVERCLOCK
+	bool "Enable CPU Overclocking option"
+	default n
+	help
+	  Krait overclocking up to 2.5 GHz
+
 config MSM_AVS_HW
 	bool "Enable Adaptive Voltage Scaling (AVS)"
 	default n
