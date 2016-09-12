@@ -1735,6 +1735,7 @@ CONFIG_UNIX98_PTYS=y
 # CONFIG_N_SMUX is not set
 # CONFIG_TRACE_SINK is not set
 # CONFIG_DEVMEM is not set
+CONFIG_FRANDOM=y
 # CONFIG_DEVKMEM is not set
 
 #

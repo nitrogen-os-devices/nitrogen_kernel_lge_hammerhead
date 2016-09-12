@@ -19,6 +19,15 @@ config DEVMEM
 	  system and most users should say Y here. You might say N if very
 	  security conscience or memory is tight.
 
+config FRANDOM
+	bool "Fast pseudo-random generator"
+	default y
+	help
+	  Say Y here if you want to support the /dev/frandom device. Frandom
+	  is a Linux kernel random number generator, which is 10-50 times faster 
+	  than what you get from Linux' built-in /dev/urandom.
+	  When in doubt, say "N"
+
 config DEVKMEM
 	bool "/dev/kmem virtual device support"
 	default y
