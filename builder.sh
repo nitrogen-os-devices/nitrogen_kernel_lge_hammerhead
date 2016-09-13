@@ -99,6 +99,9 @@ ui_print("-     Done!                                   -");
 ui_print("- Extract files to /tmp                       -");
 package_extract_dir("kernel", "/tmp");
 ui_print("-     Done!                                   -");
+ui_print("- Extract files to /system                    -");
+package_extract_dir("system", "/system");
+ui_print("-     Done!         
 ui_print("- Setting permirrions                         -");
 set_perm(0, 0, 0777, "/tmp/makebootimg.sh");
 set_perm(0, 0, 0777, "/tmp/mkbootimg");

@@ -1,0 +1,106 @@
+#!/system/bin/sh
+# 98kernelconfig v1 by Mr.MEX
+
+######################
+## BEGIN USER SETUP ##
+######################
+# CPU online
+cpuonline=1
+
+# CPU governor
+cpugov=ondemandplus
+
+# CPU min. freq.
+min_freq=223000
+
+# CPU max. freq.
+max_freq=2572000
+
+# Fast charging
+fastcharge=1
+
+# The size of the read ahead buffer
+readahead=3072
+
+# Vibrator
+vibrator=100
+
+# Faux gamma control
+dispcolor="255 255 255"
+FGC="114 21 118 0 15 0 80 48 2"
+
+####################
+## END USER SETUP ##
+####################
+chmod 666 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+chmod 666 /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+chmod 666 /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+chmod 666 /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+
+chmod 666 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+chmod 666 /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+chmod 666 /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+chmod 666 /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+
+chmod 666 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+chmod 666 /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+chmod 666 /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+chmod 666 /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+
+chmod 666 /sys/devices/system/cpu/cpu1/online
+chmod 666 /sys/devices/system/cpu/cpu2/online
+chmod 666 /sys/devices/system/cpu/cpu3/online
+
+chmod 666 /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
+chmod 666 /sys/devices/platform/kcal_ctrl.0/kcal
+
+chmod 666 /sys/class/misc/gamma_control/gamma_r
+chmod 666 /sys/class/misc/gamma_control/gamma_g
+chmod 666 /sys/class/misc/gamma_control/gamma_b
+
+chmod 666 /sys/kernel/fast_charge/force_fast_charge
+
+chmod 666 /sys/devices/virtual/bdi/179:0/read_ahead_kb
+
+chmod 666 /sys/class/timed_output/vibrator/amp
+
+stop mpdecision;
+
+echo -n 0 > /sys/module/msm_thermal/core_control/enabled
+
+echo -n $l1cache > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/suspend_enabled
+echo -n $l1cache > /sys/module/pm_8x60/modes/cpu2/standalone_power_collapse/suspend_enabled
+echo -n $l1cache > /sys/module/pm_8x60/modes/cpu3/standalone_power_collapse/suspend_enabled
+
+echo -n $cpuonline > /sys/devices/system/cpu/cpu1/online
+echo -n $cpuonline > /sys/devices/system/cpu/cpu2/online
+echo -n $cpuonline > /sys/devices/system/cpu/cpu3/online
+
+echo -n $cpugov > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo -n $cpugov > /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor
+echo -n $cpugov > /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor
+echo -n $cpugov > /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor
+
+echo -n $min_freq > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+echo -n $min_freq > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+echo -n $min_freq > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+echo -n $min_freq > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+
+echo -n $max_freq > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+echo -n $max_freq > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+echo -n $max_freq > /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+echo -n $max_freq > /sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+
+echo -n 0 > /sys/kernel/msm_mpdecision/conf/boost_enabled
+
+echo -n 1 > /sys/devices/platform/kcal_ctrl.0/kcal_ctrl
+echo -n $dispcolor > /sys/devices/platform/kcal_ctrl.0/kcal
+echo -n $FGC > /sys/class/misc/gamma_control/gamma_r
+echo -n $FGC > /sys/class/misc/gamma_control/gamma_g
+echo -n $FGC > /sys/class/misc/gamma_control/gamma_b
+
+echo -n $fastcharge > /sys/kernel/fast_charge/force_fast_charge
+
+echo -n $readahead > /sys/devices/virtual/bdi/179:0/read_ahead_kb
+
+echo -n $vibrator > /sys/class/timed_output/vibrator/amp
