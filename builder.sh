@@ -39,7 +39,7 @@ DEFCONFIG="hammerhead_defconfig"
 
 # Kernel Details
 BASE_NEX_VER="NitrogenEX"
-kversion="0.5";
+kversion="0.6";
 VER=".$kversion"
 NEX_VER="$BASE_NEX_VER$VER"
 
@@ -121,7 +121,8 @@ ui_print("- Extract files to /system                    -");
 package_extract_dir("system", "/system");
 ui_print("-     Done!                                   -");
 ui_print("- Setting permirrions                         -");
-set_perm(0, 0, 0777, "/system/etc/init.d/98kernelconfig");
+set_perm(0, 0, 0755, "/system/etc/init.d/98kernelconfig");
+set_perm(0, 0, 0777, "/tmp/editramdisk.sh");
 set_perm(0, 0, 0777, "/tmp/makebootimg.sh");
 set_perm(0, 0, 0777, "/tmp/mkbootimg");
 set_perm(0, 0, 0777, "/tmp/unpackbootimg");
@@ -133,6 +134,7 @@ ui_print("- Unpack boot.img                             -");
 run_program("/tmp/unpackbootimg", "-i", "/tmp/boot.img", "-o", "/tmp/");
 ui_print("-     Done!                                   -");
 ui_print("- Install new zImage-dtb, pack boot.img       -");
+run_program("/tmp/editramdisk.sh");
 run_program("/tmp/makebootimg.sh");
 ui_print("-     Done!                                   -");
 ui_print("- Flasing new boot.img                        -");
