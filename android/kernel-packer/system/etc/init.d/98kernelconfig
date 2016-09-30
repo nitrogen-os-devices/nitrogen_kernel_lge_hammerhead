@@ -19,12 +19,16 @@ max_freq=2265000
 # Fast charging
 fastcharge=1
 
+# Scheduler
+scheduler=vr
 # The size of the read ahead buffer
 readahead=3072
 
 # Vibrator
 vibrator=100
 
+# WiFi wakelocks
+bcmwakelocks=0
 ####################
 ## END USER SETUP ##
 ####################
@@ -52,11 +56,6 @@ chmod 666 /sys/kernel/fast_charge/force_fast_charge
 chmod 666 /sys/devices/virtual/bdi/179:0/read_ahead_kb
 
 chmod 666 /sys/class/timed_output/vibrator/amp
-
-echo -n $l1cache > /sys/module/pm_8x60/modes/cpu0/standalone_power_collapse/suspend_enabled
-echo -n $l1cache > /sys/module/pm_8x60/modes/cpu1/standalone_power_collapse/suspend_enabled
-echo -n $l1cache > /sys/module/pm_8x60/modes/cpu2/standalone_power_collapse/suspend_enabled
-echo -n $l1cache > /sys/module/pm_8x60/modes/cpu3/standalone_power_collapse/suspend_enabled
 
 echo -n $cpuonline > /sys/devices/system/cpu/cpu1/online
 echo -n $cpuonline > /sys/devices/system/cpu/cpu2/online
@@ -87,6 +86,12 @@ echo -n 0 > /sys/module/msm_thermal/core_control/enabled
 
 echo -n $fastcharge > /sys/kernel/fast_charge/force_fast_charge
 
+echo -n $scheduler > /sys/block/mmcblk0/queue/scheduler
 echo -n $readahead > /sys/devices/virtual/bdi/179:0/read_ahead_kb
 
 echo -n $vibrator > /sys/class/timed_output/vibrator/amp
+
+echo -n $bcmwakelocks > /sys/module/wakeup/parameters/enable_wlan_rx_wake_ws
+echo -n $bcmwakelocks > /sys/module/wakeup/parameters/enable_wlan_ctrl_wake_ws
+echo -n $bcmwakelocks > /sys/module/wakeup/parameters/enable_wlan_wake_ws
+echo -n $bcmwakelocks > /sys/module/wakeup/parameters/enable_si_ws
