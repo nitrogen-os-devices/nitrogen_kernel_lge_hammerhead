@@ -34,10 +34,6 @@ struct msm_thermal_data {
 	int32_t vdd_rstr_temp_hyst_degC;
 	int32_t psm_temp_degC;
 	int32_t psm_temp_hyst_degC;
-#ifdef CONFIG_INTELLI_THERMAL_V2
-	int32_t ocr_temp_degC;
-	int32_t ocr_temp_hyst_degC;
-#endif
 };
 
 #endif /*__MSM_THERMAL_H*/
