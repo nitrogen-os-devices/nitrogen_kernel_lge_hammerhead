@@ -12,13 +12,6 @@ cd /tmp/ramdisk/
 # Unpack ramdisk
 gunzip -c /tmp/ramdisk/boot.img-ramdisk.gz | cpio -i
 
-# Install initlogo
-if [ -f /tmp/ramdisk/initlogo.rle888 ]; then
-	echo "initlogo installed, skipping"
-else
-	cp /tmp/initlogo.rle888 /tmp/ramdisk/
-fi
-
 # Patching init
 if grep -q "import init.nitrogen.rc" init.hammerhead.rc; then
 	echo "Line: import init.nitrogen.rc is valid, skipping"
