@@ -19,6 +19,11 @@ else
 	insert_line init.hammerhead.rc "init.nitrogen" before "import init.hammerhead.usb.rc" "import init.nitrogen.rc";
 fi
 
+replace_string init.hammerhead.rc "#write /sys/module/msm_thermal/core_control/enabled" "write /sys/module/msm_thermal/core_control/enabled" "#write /sys/module/msm_thermal/core_control/enabled";
+replace_string init.hammerhead.rc "#start mpdecision" "start mpdecision" "#start mpdecision";
+replace_section init.hammerhead.rc "service mpdecision" "disabled" "#service mpdecision /system/bin/mpdecision --no_sleep --avg_comp\n#   class main\n#   user root\n#   group root system\n#   disabled";
+replace_section init.hammerhead.rc "service thermal-engine" "group radio system" "#service thermal-engine /system/bin/thermal-engine-hh\n#   class main\n#   user root\n#   group radio system";
+
 # Copy configs
 rm /tmp/ramdisk/init.nitrogen.rc
 rm /tmp/ramdisk/init.supolicy.sh
