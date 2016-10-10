@@ -39,7 +39,7 @@ DEFCONFIG="hammerhead_defconfig"
 
 # Kernel Details
 BASE_NEX_VER="NitrogenEX"
-kversion="0.8";
+kversion="0.9";
 VER=".$kversion"
 NEX_VER="$BASE_NEX_VER$VER"
 
