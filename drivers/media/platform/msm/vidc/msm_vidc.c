@@ -239,7 +239,7 @@ struct buffer_info *get_registered_buf(struct msm_vidc_inst *inst,
 						 temp->buff_off[i],
 						 temp->size[i]))) {
 					dprintk(VIDC_DBG,
-									"This memory region is already mapped\n");
+							"This memory region is already mapped\n");
 					ret = temp;
 					*plane = i;
 					break;
