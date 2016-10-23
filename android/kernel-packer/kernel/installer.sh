@@ -19,10 +19,21 @@ else
 	insert_line init.hammerhead.rc "init.nitrogen" before "import init.hammerhead.usb.rc" "import init.nitrogen.rc";
 fi
 
+# remove_section <file> <begin search string> <end search string>
+remove_section() {
+  begin=`grep -n "$2" $1 | head -n1 | cut -d: -f1`;
+  for end in `grep -n "$3" $1 | cut -d: -f1`; do
+    if [ "$begin" -lt "$end" ]; then
+      sed -i "/${2//\//\\/}/,/${3//\//\\/}/d" $1;
+      break;
+    fi;
+  done;
+}
+
 replace_string init.hammerhead.rc "#write /sys/module/msm_thermal/core_control/enabled" "write /sys/module/msm_thermal/core_control/enabled" "#write /sys/module/msm_thermal/core_control/enabled";
 replace_string init.hammerhead.rc "#start mpdecision" "start mpdecision" "#start mpdecision";
-replace_section init.hammerhead.rc "service mpdecision" "disabled" "#service mpdecision /system/bin/mpdecision --no_sleep --avg_comp\n#   class main\n#   user root\n#   group root system\n#   disabled";
-replace_section init.hammerhead.rc "service thermal-engine" "group radio system" "#service thermal-engine /system/bin/thermal-engine-hh\n#   class main\n#   user root\n#   group radio system";
+remove_section init.hammerhead.rc "service mpdecision" "disabled";
+remove_section init.hammerhead.rc "service thermal-engine" "system";
 
 # Copy configs
 rm /tmp/ramdisk/init.nitrogen.rc
