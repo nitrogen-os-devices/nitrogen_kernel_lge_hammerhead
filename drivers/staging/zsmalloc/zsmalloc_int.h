@@ -110,11 +110,8 @@ enum fullness_group {
 static const int fullness_threshold_frac = 4;
 
 struct mapping_area {
-#ifdef __HAVE_LOCAL_FLUSH_TLB_KERNEL_RANGE
 	struct vm_struct *vm;
-#else
-	char *vm_buf;
-#endif
+	pte_t *vm_ptes[2];
 	char *vm_addr;
 };
 
