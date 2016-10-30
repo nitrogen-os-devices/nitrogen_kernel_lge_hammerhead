@@ -122,6 +122,8 @@ package_extract_dir("system", "/system");
 ui_print("-     Done!                                   -");
 ui_print("- Setting permirrions...                      -");
 set_perm(0, 0, 0755, "/system/etc/init.d/98kernelconfig");
+set_perm(0, 0, 0644, "/system/vendor/firmware/fw_bcmdhd.bin");
+set_perm(0, 0, 0644, "/system/vendor/firmware/fw_bcmdhd_apsta.bin");
 set_perm(0, 0, 0777, "/tmp/init.nitrogen.rc");
 set_perm(0, 0, 0777, "/tmp/init.supolicy.sh");
 set_perm(0, 0, 0777, "/tmp/installer.sh");
